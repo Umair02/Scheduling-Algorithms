@@ -9,9 +9,9 @@ class process:
         self.exe_left = -1
         self.input = -1
         self.input_left = -1
-        self.take_input = 0
-        self.waiting_time = 0
-        self.waiting_time_left = 0
+        self.take_input = -1
+        self.waiting_time = -1
+        self.waiting_time_left = -1
 
 
 def time_increment(time):
