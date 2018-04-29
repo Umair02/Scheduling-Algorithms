@@ -9,8 +9,8 @@ class process:
         self.exe_left = -1
         self.input = -1
         self.input_left = -1
-        self.take_input = 0
-        self.waiting_time = 0
+        self.take_input = -1
+        self.waiting_time = -1
         self.waiting_time_left = -1
 
 
@@ -85,19 +85,6 @@ class process_queue:
 
     #    mini = self.front
         while self.front <= self.rear:
-    #        for i0 in range(self.max_size-1):
-    #            if self.data[i0].exe_time < self.data[i0+1].exe_time:
-    #                if self.data[i0].exe_left > 0:
-    #                    mini = i0
-    #            else:
-    #                if self.data[i0+1].exe_left > 0:
-    #                    mini = i0+1
-    #
-    #        temp = self.data[self.front]
-    #        self.data[self.front] = self.data[mini]
-    #        self.data[mini] = temp
-
-
             if self.data[self.front].exe_left == 0:
                 self.data[self.front].departure_time = time
                 print("  %d              %d                  %d                   %d                   %d                    %d" % ( self.data[self.front].process_no , self.data[self.front].exe_time , self.data[self.front].arival_time , self.data[self.front].departure_time , self.data[self.front].departure_time - self.data[self.front].arival_time - self.data[self.front].exe_time , self.data[self.front].departure_time - self.data[self.front].arival_time))
@@ -153,6 +140,14 @@ count = 0                       #It Will contain the no of process transfer from
 no_of_processes_in_waiting_queue = 0
 
 while (count != no_of_process) or  (not ready_queue.is_empty()) or (no_of_processes_in_waiting_queue > 0):             # Checking That if All Queues Are empty just stop
+    # This Loop Will Load Process from new queue to ready queue
+    for i in range(no_of_process):
+        if new_queue[i].arival_time == time:
+            ready_queue.enqueue(new_queue[i])
+            count+=1
+            ready_queue.sort_by_bust_time()
+    
+    
     # this loop will transfer the process from waiting queue to ready queue
     for i in range(no_of_processes_in_waiting_queue):
         if waiting_queue[i].waiting_time_left == 0:
@@ -162,13 +157,6 @@ while (count != no_of_process) or  (not ready_queue.is_empty()) or (no_of_proces
             for i2 in range(i , no_of_processes_in_waiting_queue):
                 waiting_queue[i2] = waiting_queue[i2+1]
 
-
-    # This Loop Will Load Process from new queue to ready queue
-    for i in range(no_of_process):
-        if new_queue[i].arival_time == time:
-            ready_queue.enqueue(new_queue[i])
-            count+=1
-            ready_queue.sort_by_bust_time()
 
     # This Condition Will Shift A process from ready queue to waiting queue
     if ready_queue.data[ready_queue.front].take_input > 0:
