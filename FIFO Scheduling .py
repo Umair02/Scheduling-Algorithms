@@ -139,10 +139,11 @@ while (count != no_of_process) or  (not ready_queue.is_empty()) or (no_of_proces
         if ready_queue.data[ready_queue.front].input_left > 0:
             ready_queue.data[ready_queue.front].input_left -= 1
         elif ready_queue.data[ready_queue.front].exe_left != 0:
-            waiting_queue[no_of_processes_in_waiting_queue] = ready_queue.dequeue()
-            waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input              # Again Assigning input time so it can come back for input
-            waiting_queue[no_of_processes_in_waiting_queue].waiting_time_left = waiting_queue[no_of_processes_in_waiting_queue].waiting_time
-            no_of_processes_in_waiting_queue += 1
+            if ready_queue.data[ready_queue.front].waiting_time > 0:
+                waiting_queue[no_of_processes_in_waiting_queue] = ready_queue.dequeue()
+                waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input              # Again Assigning input time so it can come back for input
+                waiting_queue[no_of_processes_in_waiting_queue].waiting_time_left = waiting_queue[no_of_processes_in_waiting_queue].waiting_time
+                no_of_processes_in_waiting_queue += 1
 
     # This Loop Will Decrement the waiting time left of all processes by 1 in waiting queue
     for i in range(no_of_processes_in_waiting_queue):
