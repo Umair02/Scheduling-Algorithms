@@ -101,6 +101,8 @@ class process_queue:
             else:
                 self.data[self.front].exe_left -= 1
                 self.data[self.front].waiting_time_left = -1
+                if self.data[self.front].take_input > 0:
+                    self.data[self.front].input_left -= 1
                 return
 
 
@@ -160,9 +162,7 @@ while (count != no_of_process) or  (not ready_queue.is_empty()) or (no_of_proces
 
     # This Condition Will Shift A process from ready queue to waiting queue
     if ready_queue.data[ready_queue.front].take_input > 0:
-        if ready_queue.data[ready_queue.front].input_left > 0:
-            ready_queue.data[ready_queue.front].input_left -= 1
-        elif ready_queue.data[ready_queue.front].exe_left != 0:
+        if ready_queue.data[ready_queue.front].input_left <= 0 and ready_queue.data[ready_queue.front].exe_left != 0:
             if ready_queue.data[ready_queue.front].waiting_time > 0:
                 waiting_queue[no_of_processes_in_waiting_queue] = ready_queue.dequeue()
                 waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input              # Again Assigning input time so it can come back for input
