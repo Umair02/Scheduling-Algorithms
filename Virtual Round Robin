@@ -222,5 +222,5 @@ while (count != no_of_process) or  (not ready_queue.is_empty()) or (no_of_proces
 
 print
 print
-print("Average Waiting Time = %f"  % ( float (ready_queue.average_waiting_time)/ float (no_of_process)))
-print("Average Turnaround Time = %f"  % ( float (ready_queue.average_turnaround_time)/ float (no_of_process)))
+print("Average Waiting Time = %f"  % ( float (ready_queue.average_waiting_time + auxiliary_queue.average_waiting_time)/ float (no_of_process)))
+print("Average Turnaround Time = %f"  % ( float (ready_queue.average_turnaround_time + auxiliary_queue.average_turnaround_time)/ float (no_of_process)))
