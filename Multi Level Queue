@@ -1,0 +1,284 @@
+class process:
+    def __init__(self):
+        self.process_no = -1
+        self.exe_time = -1
+        self.arival_time = -1
+        self.departure_time = -1
+        self.exe_left = -1
+        self.input = -1
+        self.input_left = -1
+        self.take_input = -1
+        self.waiting_time = -1
+        self.waiting_time_left = -1
+        self.quantum_time = -1
+
+
+def time_increment(time):
+    t=0
+    for i in range(10000):
+        t=0
+    time+=1
+    return time
+
+
+
+class process_queue:
+
+    def __init__(self):
+        self.max_size = 100
+        self.data = [process() for i in range(100)]
+        self.front = -1
+        self.rear = -1
+        self.average_waiting_time = 0
+        self.average_turnaround_time = 0
+
+
+    def enqueue(self,x):                        # add an element to the rear of queue
+        self.rear = (self.rear + 1) % self.max_size
+        self.data[self.rear] = x
+        if self.front == -1:
+            self.front = 0
+
+    def dequeue(self):                          # delete the element at the front of queue
+        if self.front == -1:
+            print"Queue Is Empty...\n"
+        elif self.front != self.rear:
+            temp0 = self.front
+            self.front = (self.front + 1) % self.max_size
+            return self.data[temp0]
+        else:
+            temp1 = self.front
+            self.front = -1
+            self.rear = -1
+            return self.data[temp1]
+
+    def clear(self):                             # clear the queue
+        self.front = -1
+        self.rear = -1
+
+
+    def is_empty(self):
+        return self.front == -1
+
+    def decrement(self,time):
+        if self.is_empty():
+            return
+
+        while self.front <= self.rear:
+            if self.data[self.front].exe_left == 0:
+                #self.data[self.front].departure_time = time
+                print("  %d              %d                  %d                   %d                   %d                    %d" % ( self.data[self.front].process_no , self.data[self.front].exe_time , self.data[self.front].arival_time , self.data[self.front].departure_time , self.data[self.front].departure_time - self.data[self.front].arival_time - self.data[self.front].exe_time , self.data[self.front].departure_time - self.data[self.front].arival_time))
+
+                self.average_waiting_time += self.data[self.front].departure_time - self.data[self.front].arival_time - self.data[self.front].exe_time
+                self.average_turnaround_time += self.data[self.front].departure_time - self.data[self.front].arival_time
+
+                if self.front != self.rear:
+                    self.front += 1
+                else:
+                    self.front = -1
+                    self.rear = -1
+            else:
+                self.data[self.front].exe_left -= 1
+                self.data[self.front].quantum_time -= 1
+                if self.data[self.front].take_input > 0:
+                    self.data[self.front].input_left -= 1
+                if self.data[self.front].exe_left == 0:
+                    self.data[self.front].departure_time = time + 1
+                return
+
+
+
+
+time = 0
+q1_time = 30
+q2_time = 60
+queue1 = process_queue()                    #round robin for process up to  30s
+queue2 = process_queue()                    #round robin for process up to 60s
+queue3 = process_queue()                    #FCFS for process greater than 60s
+new_queue = [process() for i in range(100)]
+waiting_queue = [process() for i1 in range(100)]
+
+no_of_process = input("Enter Number of Process : ")
+quantum1 = input("Enter The Quantum Time For First Queue : ")
+quantum2 = input("Enter The Quantum Time For Second Queue : ")
+
+
+for i in range(no_of_process):                                     # Taking input
+    print "Enter Process " , i , " Information"
+    new_queue[i].exe_time = input("Enter Burst Time : ")
+    new_queue[i].arival_time = input("Enter Arrival Time : ")
+    new_queue[i].take_input = input("Is the Process Takes Input (0/1): ")
+    if new_queue[i].take_input:
+        new_queue[i].input = input("Enter The Time After Which The Process goes for Input : ")
+        new_queue[i].waiting_time = input("How Much Time It Will Spend in Waiting Queue : ")
+    else:
+        new_queue[i].input = -1
+    new_queue[i].exe_left = new_queue[i].exe_time
+    new_queue[i].input_left = new_queue[i].input
+    new_queue[i].process_no = i
+    #print("  %d              %d                  %d                   %d                   %d                    %d" % ( temp.process_no , temp.exe_time , temp.arival_time ,temp.departure_time , temp.departure_time - temp.arival_time - temp.exe_time ,temp.departure_time - temp.arival_time))
+    #new_queue[i] = temp                                          # After Input Each Process is in new queue
+
+print("Process        Bust Time        Arrival Time        Departure Time        Waiting Time        Turnaround Time")
+
+
+#for i3 in range(no_of_process):
+    #print("  %d              %d                  %d                   %d                   %d                    %d" % ( new_queue[i3].process_no , new_queue[i3].exe_time , new_queue[i3].arival_time ,new_queue[i3].departure_time , new_queue[i3].departure_time - new_queue[i3].arival_time - new_queue[i3].exe_time ,new_queue[i3].departure_time - new_queue[i3].arival_time))
+
+
+count = 0                       #It Will contain the no of process transfer from new queue to ready queue
+no_of_processes_in_waiting_queue = 0
+
+while (count != no_of_process) or  (not queue1.is_empty()) or (no_of_processes_in_waiting_queue > 0) or (not queue2.is_empty()) or (not queue3.is_empty()):             # Checking That if All Queues Are empty just stop
+    # This Loop Will Load Process from new queue to ready queue
+    for i in range(no_of_process):
+        if new_queue[i].arival_time == time:
+            if new_queue[i].exe_time <= q1_time:
+                new_queue[i].quantum_time = quantum1
+                queue1.enqueue(new_queue[i])
+            elif new_queue[i].exe_time <= q2_time :
+                new_queue[i].quantum_time = quantum2
+                queue2.enqueue(new_queue[i])
+            else:
+                new_queue[i].quantum_time = new_queue[i].exe_time
+                queue3.enqueue(new_queue[i])
+            count += 1
+
+
+    # this loop will transfer the process from waiting queue to queue's
+    for i in range(no_of_processes_in_waiting_queue):
+        if waiting_queue[i].waiting_time_left == 0:
+            waiting_queue[i].waiting_time_left = -1
+            if waiting_queue[i].exe_time <= q1_time:
+                queue1.enqueue(waiting_queue[i])
+            elif waiting_queue[i].exe_time <= q2_time:
+                queue2.enqueue(waiting_queue[i])
+            else:
+                queue3.enqueue(waiting_queue[i])
+            no_of_processes_in_waiting_queue -= 1
+            for i2 in range(i , no_of_processes_in_waiting_queue):
+                waiting_queue[i2] = waiting_queue[i2+1]
+
+    #print "time : ", time
+    #for i in range(queue1.front , queue1.rear + 1):
+        #print("  %d              %d                  %d                   %d                   %d                    %d        %d      %d   queue     %d" % ( queue1.data[i].process_no , queue1.data[i].exe_time , queue1.data[i].arival_time ,queue1.data[i].departure_time , queue1.data[i].departure_time - queue1.data[i].arival_time - queue1.data[i].exe_time ,queue1.data[i].departure_time - queue1.data[i].arival_time , queue1.data[i].exe_left , queue1.data[i].quantum_time  , queue1.data[i].input_left  ) )
+    #print
+
+
+
+
+    # it will handle if the burst time of process in queue 1 finished than send the process to the tail
+    if not queue1.is_empty():
+        if queue1.data[queue1.front].quantum_time == 0 and queue1.data[queue1.front].exe_left != 0 and queue1.data[queue1.front].input_left != 0:
+            temp = queue1.dequeue()
+            temp.quantum_time = quantum1
+            queue1.enqueue(temp)
+
+
+
+    # it will handle if the burst time of process in queue 2 finished than send the process to the tail
+    if not queue2.is_empty():
+        if queue2.data[queue2.front].quantum_time == 0 and queue2.data[queue2.front].exe_left != 0 and queue2.data[queue2.front].input_left != 0:
+            temp = queue2.dequeue()
+            temp.quantum_time = quantum1
+            queue2.enqueue(temp)
+
+
+
+
+    # This Condition Will Shift A process from queue 2 to waiting queue
+    if not queue2.is_empty():
+        if queue2.data[queue2.front].take_input > 0:
+            if queue2.data[queue2.front].input_left <= 0 and queue2.data[queue2.front].exe_left != 0:
+                if queue2.data[queue2.front].waiting_time > 0:
+                    waiting_queue[no_of_processes_in_waiting_queue] = queue2.dequeue()
+                    waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input  # Again Assigning input time so it can come back for input
+                    waiting_queue[no_of_processes_in_waiting_queue].waiting_time_left = waiting_queue[no_of_processes_in_waiting_queue].waiting_time
+                    if waiting_queue[no_of_processes_in_waiting_queue].quantum_time == 0:
+                        waiting_queue[no_of_processes_in_waiting_queue].quantum_time = quantum2
+                    no_of_processes_in_waiting_queue += 1
+
+
+
+    # This Condition Will Shift A process from queue 1 to waiting queue
+    if not queue1.is_empty():
+        if queue1.data[queue1.front].take_input > 0:
+            if queue1.data[queue1.front].input_left <= 0 and queue1.data[queue1.front].exe_left != 0:
+                if queue1.data[queue1.front].waiting_time > 0:
+                    waiting_queue[no_of_processes_in_waiting_queue] = queue1.dequeue()
+                    waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input              # Again Assigning input time so it can come back for input
+                    waiting_queue[no_of_processes_in_waiting_queue].waiting_time_left = waiting_queue[no_of_processes_in_waiting_queue].waiting_time
+                    if waiting_queue[no_of_processes_in_waiting_queue].quantum_time == 0:
+                        waiting_queue[no_of_processes_in_waiting_queue].quantum_time = quantum1
+                    no_of_processes_in_waiting_queue += 1
+
+
+
+
+    # This Condition Will Shift A process from queue 3 to waiting queue
+    if not queue3.is_empty():
+        if queue3.data[queue3.front].take_input > 0:
+            if queue3.data[queue3.front].input_left <= 0 and queue3.data[queue3.front].exe_left != 0:
+                if queue3.data[queue3.front].waiting_time > 0:
+                    waiting_queue[no_of_processes_in_waiting_queue] = queue3.dequeue()
+                    waiting_queue[no_of_processes_in_waiting_queue].input_left = waiting_queue[no_of_processes_in_waiting_queue].input              # Again Assigning input time so it can come back for input
+                    waiting_queue[no_of_processes_in_waiting_queue].waiting_time_left = waiting_queue[no_of_processes_in_waiting_queue].waiting_time
+                    if waiting_queue[no_of_processes_in_waiting_queue].quantum_time == 0:
+                        waiting_queue[no_of_processes_in_waiting_queue].quantum_time = quantum1
+                    no_of_processes_in_waiting_queue += 1
+
+
+    # This Loop Will Decrement the waiting time left of all processes by 1 in waiting queue
+    for i in range(no_of_processes_in_waiting_queue):
+        waiting_queue[i].waiting_time_left -= 1
+        #print "Waiting queue process time left : " , waiting_queue[i].waiting_time_left
+
+
+    if (queue1.is_empty() and queue2.is_empty()) or (queue3.data[queue3.front].quantum_time < queue3.data[queue3.front].exe_time  and queue3.data[queue3.front].exe_left != 0   and not queue3.is_empty()):
+        if queue3.data[queue3.front].take_input < 1:
+            queue3.decrement(time)
+        elif queue3.data[queue3.front].input_left > 0 and queue3.data[queue3.front].input_left != queue3.data[queue3.front].input:
+            queue3.decrement(time)
+        else:
+            if queue1.is_empty():
+                queue2.decrement(time)
+                if queue2.is_empty():
+                    queue3.decrement(time)
+
+            else:
+                queue1.decrement(time)
+                if queue1.is_empty():
+                    queue2.decrement(time)
+                    if queue2.is_empty():
+                        queue3.decrement(time)
+    elif queue1.is_empty() or (queue2.data[queue2.front].quantum_time < quantum2  and queue2.data[queue2.front].exe_left != 0   and not queue2.is_empty()):
+            if queue2.data[queue2.front].take_input < 1:
+                queue2.decrement(time)
+                if queue2.is_empty():
+                    queue3.decrement(time)
+            elif queue2.data[queue2.front].input_left > 0 and queue2.data[queue2.front].input_left != queue2.data[queue2.front].input:
+                queue2.decrement(time)
+                if queue2.is_empty():
+                    queue3.decrement(time)
+            else:
+                queue1.decrement(time)
+                if queue1.is_empty():
+                    queue2.decrement(time)
+                    if queue2.is_empty():
+                        queue3.decrement(time)
+
+    else:
+        queue1.decrement(time)
+        if queue1.is_empty():
+            queue2.decrement(time)
+            if queue2.is_empty():
+                queue3.decrement(time)
+
+    time = time_increment(time)  # Increment in clock
+
+# For Average Waiting And Turnaround time
+
+print
+print
+print("Average Waiting Time = %f"  % ( float (queue1.average_waiting_time + queue2.average_waiting_time + queue3.average_waiting_time)/ float (no_of_process)))
+print("Average Turnaround Time = %f"  % ( float (queue1.average_turnaround_time + queue2.average_turnaround_time + queue3.average_turnaround_time)/ float (no_of_process)))
