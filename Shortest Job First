@@ -32,8 +32,8 @@ def time_increment(time):
 class process_queue:
 
     def __init__(self):
-        self.max_size = 100
-        self.data = [process() for i in range(100)]
+        self.max_size = 1000
+        self.data = [process() for i in range(1000)]
         self.front = -1
         self.rear = -1
         self.average_waiting_time = 0
