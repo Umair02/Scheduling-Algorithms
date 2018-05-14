@@ -65,7 +65,8 @@ class process_queue:
         if self.is_empty():
             return
 
-        while self.front <= self.rear:
+        #while self.front <= self.rear:
+        while not self.is_empty():
             if self.data[self.front].exe_left == 0:
                 self.data[self.front].departure_time = time
                 print("  %d              %d                  %d                   %d                   %d                    %d" % ( self.data[self.front].process_no , self.data[self.front].exe_time , self.data[self.front].arival_time , self.data[self.front].departure_time , self.data[self.front].departure_time - self.data[self.front].arival_time - self.data[self.front].exe_time , self.data[self.front].departure_time - self.data[self.front].arival_time))
@@ -74,7 +75,7 @@ class process_queue:
                 self.average_turnaround_time += self.data[self.front].departure_time - self.data[self.front].arival_time
 
                 if self.front != self.rear:
-                    self.front += 1
+                    self.front = (self.front + 1) % self.maxsize
                 else:
                     self.front = -1
                     self.rear = -1
